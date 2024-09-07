@@ -1,0 +1,49 @@
+{
+  'method': 'random',
+
+  'metric': {
+    'name' : 'loss',
+    'goal' : 'minimize'
+  },
+
+  'parameters': {
+
+    # dataset rootdir
+    'rootdir'       : {
+      'values'      : ['']
+    },
+
+    # number of categories to train alexnet
+    'categories'    : {
+      'values'      : [100]
+    },
+
+    'optimizer'     : {
+      'values'      : ['adam']
+    },
+
+    'batch_size'     : {
+      'values'      : [32]
+    },
+
+    'datasetsize'   : {
+      'values'      : [10]
+    },
+
+    'dataset_path'   : {
+      'values'      : ['/home/pqbas/boopbass/sky-signature-comparison/dataset']
+    },
+
+    'learning_rate' : {
+      'values'      : [0.01]
+    },
+
+    'epochs'        : {
+      'values'      : [2]
+    },
+
+    'path'          : {
+      'values'      : ['weights']
+    }
+  }
+}
