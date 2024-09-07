@@ -1,10 +1,10 @@
 import argparse
-import wandb
 import yaml
 import torch
 import torch.optim as optim
 import torch.nn as nn
 import os
+from model import AlexNet
 
 def saveModel(
     model,
@@ -66,14 +66,13 @@ def buildOptimizer(
 
 
 def buildModel(
-    numCategories : int
+    numCategories : int,
+    device        : str
 ):
     dummyInput = torch.rand([1, 1, 224, 224]).to(device)
     model = AlexNet(numCategories = numCategories).to(device)
     model(dummyInput)
     return model
-
-
 
 
 def buildDataloader(
@@ -100,6 +99,7 @@ def testEpoch(
 
     return metrics
 
+
 def trainEpoch(
     model,
     trainLoader,
@@ -113,6 +113,7 @@ def trainEpoch(
 
     return
 
+
 def getDataset(
     path : str
 ):
@@ -120,6 +121,11 @@ def getDataset(
     Returns a dataset
     '''
     return
+
+
+def getDevice() -> str:
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    return device
 
 def getConfig(
     path : str
@@ -135,6 +141,7 @@ def getConfig(
 
     return config
 
+
 def run(
     params : dict
 ):
@@ -146,26 +153,28 @@ def run(
                                   typeloader = 'train')
 
     testloader = buildDataloader(dataset,
-                                 batchsize  = params['batch_size'],
                                  typeloader = 'test')
 
-    model     = buildModel(numCategories = params['categories'])
+    device     = getDevice()
 
-    optimizer = buildOptimizer(model,
-                               typeOptimizer = params['optimizer'],
-                               learningRate  = params['learning_rate']) 
-
-    lossf = buildLoss(typeloss = params['loss'])
-
-    for _ in range(params['config']):
-        loss = trainEpoch(model, trainloader, optimizer, lossf)
-        acc  = testEpoch(model, testloader)
-
-    saveModel(model, 
-              name = params['name'], 
-              path = params['path'])
-
-    torch.cuda.empty_cache()
+    model     = buildModel(numCategories = params['categories'],
+                           device        = device)
+    
+    # optimizer = buildOptimizer(model,
+    #                            typeOptimizer = params['optimizer'],
+    #                            learningRate  = params['learning_rate']) 
+    #
+    # lossf = buildLoss(typeloss = params['loss'])
+    #
+    # for _ in range(params['config']):
+    #     loss = trainEpoch(model, trainloader, optimizer, lossf)
+    #     acc  = testEpoch(model, testloader)
+    #
+    # saveModel(model, 
+    #           name = params['name'], 
+    #           path = params['path'])
+    #
+    # torch.cuda.empty_cache()
 
     return
 
@@ -182,3 +191,5 @@ if __name__ == '__main__':
 
     config = getConfig(args.config)
     run(params = config['parameters'])
+
+
