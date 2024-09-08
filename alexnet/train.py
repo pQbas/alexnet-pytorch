@@ -5,11 +5,14 @@ import torch.optim as optim
 import torch.nn as nn
 import os
 from model import AlexNet
+import torchvision
+import torchvision.transforms as transforms
+from config import Config
 
 def saveModel(
-    model,
-    name : str,
-    path : str
+    model : nn.Module,
+    name  : str,
+    path  : str
     ):
     '''
     Saves model at directory defined by path with 
@@ -29,7 +32,7 @@ def saveModel(
 
 
 def buildLoss(
-    typeloss : str
+    typeLoss : str
 ):
     '''
     Return the loss function given by the
@@ -38,14 +41,14 @@ def buildLoss(
 
     loss = None
 
-    if typeloss == 'bce':
+    if typeLoss == 'bce':
         loss = nn.BCELoss() 
 
     return loss
 
 
 def buildOptimizer(
-    model,
+    model : nn.Module,
     typeOptimizer : str,
     learningRate  : float
 ):
@@ -69,8 +72,8 @@ def buildModel(
     numCategories : int,
     device        : str
 ):
-    dummyInput = torch.rand([1, 1, 224, 224]).to(device)
-    model = AlexNet(numCategories = numCategories).to(device)
+    dummyInput = torch.rand([1, 3, 224, 224]).to(device)
+    model = AlexNet(categories = numCategories).to(device)
     model(dummyInput)
     return model
 
@@ -78,14 +81,18 @@ def buildModel(
 def buildDataloader(
     dataset,
     batchsize  : int,
-    typeloader : str
 ):
     '''
     Build a dataloader to the dataset with a batch
     -size and a typeLoader (train, test, val), for
     different use
     '''
-    return
+
+    loader = torch.utils.data.DataLoader(dataset,
+                                         batch_size=batchsize,
+                                         shuffle=True,
+                                         num_workers=2)
+    return loader
 
 
 def testEpoch(
@@ -115,56 +122,55 @@ def trainEpoch(
 
 
 def getDataset(
-    path : str
+    name : str,
+    path : str = None
 ):
     '''
     Returns a dataset
     '''
-    return
+    trainset, testset = None, None
+    
+    if name == 'cifar':
+        transform = transforms.Compose(
+                [transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+        trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
+                                                download=True, transform=transform)
+        
+        testset = torchvision.datasets.CIFAR10(root='./data', train=False,
+                                            download=True, transform=transform)
+
+    return (trainset, testset)
 
 
 def getDevice() -> str:
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     return device
 
-def getConfig(
-    path : str
-) -> dict:
-    config = None
-
-    with open(path, 'r') as stream:
-        config = yaml.safe_load(stream)
-
-    if not (config):
-        print('Verify your the file path in argument')
-        exit()
-
-    return config
-
 
 def run(
     params : dict
 ):
 
-    dataset     = getDataset(path = params['dataset_path'])
+    trainset, testset = getDataset(name = 'cifar')
 
-    trainloader = buildDataloader(dataset,
-                                  batchsize  = params['batch_size'],
-                                  typeloader = 'train')
+    trainloader = buildDataloader(trainset,
+                                  batchsize  = params['batch_size'])
 
-    testloader = buildDataloader(dataset,
-                                 typeloader = 'test')
+    testloader = buildDataloader(testset,
+                                 batchsize = params['batch_size'])
 
-    device     = getDevice()
+    device = getDevice()
 
-    model     = buildModel(numCategories = params['categories'],
-                           device        = device)
+    model = buildModel(numCategories = params['categories'],
+                       device        = device)
     
-    # optimizer = buildOptimizer(model,
-    #                            typeOptimizer = params['optimizer'],
-    #                            learningRate  = params['learning_rate']) 
-    #
-    # lossf = buildLoss(typeloss = params['loss'])
+    optimizer = buildOptimizer(model,
+                               typeOptimizer = params['optimizer'],
+                               learningRate  = params['learning_rate']) 
+    
+    lossf = buildLoss(typeLoss = params['loss'])
     #
     # for _ in range(params['config']):
     #     loss = trainEpoch(model, trainloader, optimizer, lossf)
@@ -181,15 +187,18 @@ def run(
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('--config', 
-                        type=str, 
-                        default='config.yaml', 
-                        help='Configuration file for training')
+    # parser = argparse.ArgumentParser(description='')
+    # parser.add_argument('--config', 
+    #                     type=str, 
+    #                     default='config.yaml', 
+    #                     help='Configuration file for training')
+    #
+    # args = parser.parse_args()
+    #
+    # config = getConfig(args.config)
 
-    args = parser.parse_args()
 
-    config = getConfig(args.config)
-    run(params = config['parameters'])
+    config = Config()
+    run(params = config.params)
 
 
