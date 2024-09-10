@@ -8,6 +8,9 @@ from model import AlexNet
 import torchvision
 import torchvision.transforms as transforms
 from config import Config
+import numpy as np
+from tqdm import tqdm, trange
+
 
 def saveModel(
     model : nn.Module,
@@ -41,8 +44,11 @@ def buildLoss(
 
     loss = None
 
-    if typeLoss == 'bce':
+    if typeLoss == 'binary-cross-entropy':
         loss = nn.BCELoss() 
+
+    if typeLoss == 'cross-entropy':
+        loss = nn.CrossEntropyLoss()
 
     return loss
 
@@ -90,8 +96,9 @@ def buildDataloader(
 
     loader = torch.utils.data.DataLoader(dataset,
                                          batch_size=batchsize,
-                                         shuffle=True,
-                                         num_workers=2)
+                                         shuffle=False,
+                                         num_workers=2,
+                                         sampler=np.random.permutation(20))
     return loader
 
 
@@ -111,14 +118,36 @@ def trainEpoch(
     model,
     trainLoader,
     optimizer,
-    loss
+    lossf,
+    device
 ):
     '''
     Perform training of the model with the train-set,
     optimizer, and loss function, returns the model trained
     '''
 
-    return
+    model.train()
+    runningLoss = []
+
+    pbar = tqdm(trainLoader, unit='batch', desc='description')
+
+    for data in pbar:
+        pbar.set_description('Training progress')
+
+        inputs, labels = data[0].to(device), data[1].to(device)
+
+        optimizer.zero_grad()
+
+        outputs = model(inputs)
+        probs  = nn.Softmax(dim=1)(outputs)
+        
+        loss = lossf(probs, labels)
+        loss.backward()
+        optimizer.step()
+
+        runningLoss.append(loss.item())
+
+    return np.mean(runningLoss)
 
 
 def getDataset(
@@ -132,11 +161,14 @@ def getDataset(
     
     if name == 'cifar':
         transform = transforms.Compose(
-                [transforms.ToTensor(),
+                [transforms.Resize((224,224)),
+                transforms.ToTensor(),
                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-        trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                                download=True, transform=transform)
+        trainset = torchvision.datasets.CIFAR10(root='./data', 
+                                                train=True,
+                                                download=True, 
+                                                transform=transform)
         
         testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                             download=True, transform=transform)
@@ -152,6 +184,7 @@ def getDevice() -> str:
 def run(
     params : dict
 ):
+    device = getDevice()
 
     trainset, testset = getDataset(name = 'cifar')
 
@@ -161,8 +194,6 @@ def run(
     testloader = buildDataloader(testset,
                                  batchsize = params['batch_size'])
 
-    device = getDevice()
-
     model = buildModel(numCategories = params['categories'],
                        device        = device)
     
@@ -171,11 +202,16 @@ def run(
                                learningRate  = params['learning_rate']) 
     
     lossf = buildLoss(typeLoss = params['loss'])
-    #
-    # for _ in range(params['config']):
-    #     loss = trainEpoch(model, trainloader, optimizer, lossf)
-    #     acc  = testEpoch(model, testloader)
-    #
+    
+    for i in range(params['epochs']):
+
+        print(f"Epoch {i}/{params['epochs']}")
+
+        loss = trainEpoch(model, trainloader, optimizer, lossf, device)
+        print('Training loss:', loss)
+        
+        acc  = testEpoch(model, testloader)
+    
     # saveModel(model, 
     #           name = params['name'], 
     #           path = params['path'])

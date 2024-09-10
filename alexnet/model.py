@@ -46,8 +46,7 @@ class AlexNet(nn.Module):
         )
 
         self.stack8 = nn.Sequential(
-            nn.Linear(4096, categories),
-            nn.Softmax(dim=0)
+            nn.Linear(4096, categories)
         )
 
     def forward(self, x):
@@ -56,7 +55,7 @@ class AlexNet(nn.Module):
         x = self.stack3(x)
         x = self.stack4(x)
         x = self.stack5(x)
-        x = torch.flatten(x)
+        x = torch.flatten(x, start_dim=1)
         x = self.stack6(x)
         x = self.stack7(x)
         x = self.stack8(x)
@@ -64,12 +63,15 @@ class AlexNet(nn.Module):
 
 
 if __name__ == '__main__':
-    print('return x')
 
     model = AlexNet(categories=10)
 
-    input  = torch.rand([1, 3, 224, 224])
+    input  = torch.rand([4, 3, 224, 224])
     output = model(input)
     print(output.shape)
+    probs  = nn.Softmax(dim=1)(output)
+    print(probs.shape)
+    # print(output)
+    # print(output.shape)
 
 
