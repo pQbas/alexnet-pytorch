@@ -6,9 +6,9 @@ Alexnet cnn implemented in pytorch
 
 Run following command at `alexnet` directory, this command creates a container with a share volume with the files of the directory. After run this change to the `test` folder, and work as usual.
 
-```
+```bash
 docker run -it -v $PWD:/test --gpus all pytorch/pytorch
-cd ../test
+cd ../test/alexnet
 ```
 
 

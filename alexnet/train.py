@@ -7,7 +7,7 @@ import os
 from model import AlexNet
 import torchvision
 import torchvision.transforms as transforms
-from config import Config
+import configparser
 import numpy as np
 from tqdm import tqdm, trange
 
@@ -104,14 +104,35 @@ def buildDataloader(
 
 def testEpoch(
     model,
-    testLoader
+    testLoader,
+    device
 ):
     '''
     Compute the accuracy for the model with the
     testLoader
     '''
+    total_correct, total_samples = 0, 0
 
-    return metrics
+    threshold = 0.5
+    model.eval() 
+     
+    pbar = tqdm(testLoader, unit='batch', desc='description')
+    
+    for data in pbar:
+        pbar.set_description('Testing progress')
+
+        inputs, labels = data[0].to(device), data[1].to(device)
+
+        outputs = model(inputs)
+        probs  = nn.Softmax(dim=1)(outputs)
+
+        values, indices = torch.max(probs, dim=1)
+
+        total_correct += torch.sum((indices == labels) * (values >= threshold)).item()
+        total_samples += labels.size(0) 
+    
+    accuracy = total_correct / total_samples
+    return accuracy
 
 
 def trainEpoch(
@@ -189,12 +210,12 @@ def run(
     trainset, testset = getDataset(name = 'cifar')
 
     trainloader = buildDataloader(trainset,
-                                  batchsize  = params['batch_size'])
+                                  batchsize  = int(params['batch_size']))
 
     testloader = buildDataloader(testset,
-                                 batchsize = params['batch_size'])
+                                 batchsize = int(params['batch_size']))
 
-    model = buildModel(numCategories = params['categories'],
+    model = buildModel(numCategories = int(params['categories']),
                        device        = device)
     
     optimizer = buildOptimizer(model,
@@ -203,38 +224,59 @@ def run(
     
     lossf = buildLoss(typeLoss = params['loss'])
     
-    for i in range(params['epochs']):
+    for i in range(int(params['epochs'])):
 
         print(f"Epoch {i}/{params['epochs']}")
 
         loss = trainEpoch(model, trainloader, optimizer, lossf, device)
-        print('Training loss:', loss)
         
-        acc  = testEpoch(model, testloader)
-    
+        acc  = testEpoch(model, testloader, device)
+        
+        print('Training Loss:', loss) 
+        print('Testing Accuracy:', acc)
+
     # saveModel(model, 
     #           name = params['name'], 
     #           path = params['path'])
     #
     # torch.cuda.empty_cache()
-
     return
+
+def getConfig(filePath):
+    config = configparser.ConfigParser()
+    config.read(filePath)
+
+    settings = {}
+
+    for key, value in config['params'].items():
+        if value.isdigit():
+            settings[key] = int(value)
+
+    for key, value in config['params'].items():
+        try:
+            settings[key] = float(value)
+        except:
+            pass
+
+    true_values = ['true', 'yes']
+    false_values = ['false', 'no']
+
+    for key, value in config['params'].items():
+        if value.lower() in true_values:
+            settings[key] = True
+        elif value.lower() in false_values:
+            settings[key] = False
+
+    for key, value in config['params'].items():
+        if key not in settings:
+            settings[key] = value
+
+    return settings
 
 
 if __name__ == '__main__':
 
-    # parser = argparse.ArgumentParser(description='')
-    # parser.add_argument('--config', 
-    #                     type=str, 
-    #                     default='config.yaml', 
-    #                     help='Configuration file for training')
-    #
-    # args = parser.parse_args()
-    #
-    # config = getConfig(args.config)
-
-
-    config = Config()
-    run(params = config.params)
+    config = getConfig('config.ini')
+    run(params = config)
 
 
