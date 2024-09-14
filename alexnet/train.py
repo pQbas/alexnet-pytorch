@@ -4,7 +4,7 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 import os
-from model import AlexNet
+from alexnet.model import AlexNet
 import torchvision
 import torchvision.transforms as transforms
 import configparser
