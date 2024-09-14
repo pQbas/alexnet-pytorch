@@ -10,7 +10,7 @@ import torchvision.transforms as transforms
 import configparser
 import numpy as np
 from tqdm import tqdm, trange
-
+from datetime import datetime
 
 def saveModel(
     model : nn.Module,
@@ -22,14 +22,16 @@ def saveModel(
     a given name, return true if the model was 
     saved succesfully and false if not
     '''
+
+    current_time = datetime.now().strftime('%Y%m%d-%H%M%S')
     
     if not os.path.exists(path):
         os.makedirs(path)
         print(f"Folder '{path}' created successfully.")
     else:
         print(f"Folder '{path}' already exists.")
-    
-    torch.save(model.state_dict(), os.path.join(path, f'{name}.pt'))
+
+    torch.save(model.state_dict(), os.path.join(path, f'{name}-{current_time}.pt'))
 
     return
 
@@ -98,7 +100,7 @@ def buildDataloader(
                                          batch_size=batchsize,
                                          shuffle=False,
                                          num_workers=2,
-                                         sampler=np.random.permutation(20))
+                                         sampler=np.random.permutation(10))
     return loader
 
 
@@ -180,7 +182,7 @@ def getDataset(
     '''
     trainset, testset = None, None
     
-    if name == 'cifar':
+    if name == 'cifar10':
         transform = transforms.Compose(
                 [transforms.Resize((224,224)),
                 transforms.ToTensor(),
@@ -202,12 +204,12 @@ def getDevice() -> str:
     return device
 
 
-def run(
+def train(
     params : dict
 ):
     device = getDevice()
 
-    trainset, testset = getDataset(name = 'cifar')
+    trainset, testset = getDataset(name = params['dataset_name'])
 
     trainloader = buildDataloader(trainset,
                                   batchsize  = int(params['batch_size']))
@@ -225,21 +227,19 @@ def run(
     lossf = buildLoss(typeLoss = params['loss'])
     
     for i in range(int(params['epochs'])):
+        print(f" ------> Epoch {i}/{params['epochs']}")
 
-        print(f"Epoch {i}/{params['epochs']}")
-
-        loss = trainEpoch(model, trainloader, optimizer, lossf, device)
-        
+        loss = trainEpoch(model, trainloader, optimizer, lossf, device) 
         acc  = testEpoch(model, testloader, device)
         
         print('Training Loss:', loss) 
         print('Testing Accuracy:', acc)
 
-    # saveModel(model, 
-    #           name = params['name'], 
-    #           path = params['path'])
-    #
-    # torch.cuda.empty_cache()
+    saveModel(model, 
+              name = params['name'], 
+              path = params['path'])
+    
+    torch.cuda.empty_cache()
     return
 
 def getConfig(filePath):
@@ -277,6 +277,6 @@ def getConfig(filePath):
 if __name__ == '__main__':
 
     config = getConfig('config.ini')
-    run(params = config)
+    train(params = config)
 
 

@@ -24,8 +24,48 @@ def test_training_testEpoch():
                                        batchsize = int(params['batch_size']))
      
     acc = train.testEpoch(model, testloader, device)
-        
+
     assert isinstance(acc, float), f"Expected float, got {type(acc)}"
     assert 0.0 <= acc <= 1.0, f"Accuracy out of bounds: {acc}"
+
+
+def test_training_trainpipeline():
+    CONFIG_FILE_PATH = '/test/alexnet/config.ini'
+
+    params = train.getConfig(CONFIG_FILE_PATH)
+    
+    device = train.getDevice()
+
+    trainset, testset = train.getDataset(name = 'cifar')
+
+    model = train.buildModel(numCategories = int(params['categories']),
+                             device        = device)
+
+    trainloader = train.buildDataloader(trainset,
+                                        batchsize = int(params['batch_size']))
+
+    testloader = train.buildDataloader(testset,
+                                       batchsize = int(params['batch_size']))
+
+    optimizer = train.buildOptimizer(model,
+                                     typeOptimizer = params['optimizer'],
+                                     learningRate  = params['learning_rate'])  
+
+    lossf = train.buildLoss(typeLoss = params['loss'])
+
+    acc = train.testEpoch(model, testloader, device)
+    loss = train.trainEpoch(model, trainloader, optimizer, lossf, device)
+
+    assert isinstance(acc, float), f"Expected float, got {type(acc)}"
+    assert 0.0 <= acc <= 1.0, f"Accuracy out of bounds: {acc}"
+
+    assert isinstance(loss, float), f"Expected float, got {type(loss)}"
+
+
+
+def test_training_train():
+    CONFIG_FILE_PATH = '/test/alexnet/config.ini'
+    params = train.getConfig(CONFIG_FILE_PATH)
+    train.train(params)
 
 
