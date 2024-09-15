@@ -31,7 +31,10 @@ def saveModel(
     else:
         print(f"Folder '{path}' already exists.")
 
-    torch.save(model.state_dict(), os.path.join(path, f'{name}-{current_time}.pt'))
+    modelName = f'{name}-{current_time}.pt'  
+    
+    torch.save(model.state_dict(), os.path.join(path, modelName))
+    print(f"Weights '{modelName}' were saved at '{path}'")
 
     return
 
@@ -72,6 +75,8 @@ def buildOptimizer(
         optimizer = optim.Adam(model.parameters(), lr=learningRate)
     elif typeOptimizer == 'adadelta':
         optimizer = optim.Adadelta(model.parameters(), lr=learningRate)
+    else:
+        raise ValueError("At buildOptimizer(), typeOptimizer must be one of the valid options")
 
     return optimizer
 
@@ -195,7 +200,8 @@ def getDataset(
         
         testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                             download=True, transform=transform)
-
+    else:
+        raise ValueError("At getDataset 'name' param must be one of valid datasets") 
     return (trainset, testset)
 
 
@@ -203,44 +209,6 @@ def getDevice() -> str:
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     return device
 
-
-def train(
-    params : dict
-):
-    device = getDevice()
-
-    trainset, testset = getDataset(name = params['dataset_name'])
-
-    trainloader = buildDataloader(trainset,
-                                  batchsize  = int(params['batch_size']))
-
-    testloader = buildDataloader(testset,
-                                 batchsize = int(params['batch_size']))
-
-    model = buildModel(numCategories = int(params['categories']),
-                       device        = device)
-    
-    optimizer = buildOptimizer(model,
-                               typeOptimizer = params['optimizer'],
-                               learningRate  = params['learning_rate']) 
-    
-    lossf = buildLoss(typeLoss = params['loss'])
-    
-    for i in range(int(params['epochs'])):
-        print(f" ------> Epoch {i}/{params['epochs']}")
-
-        loss = trainEpoch(model, trainloader, optimizer, lossf, device) 
-        acc  = testEpoch(model, testloader, device)
-        
-        print('Training Loss:', loss) 
-        print('Testing Accuracy:', acc)
-
-    saveModel(model, 
-              name = params['name'], 
-              path = params['path'])
-    
-    torch.cuda.empty_cache()
-    return
 
 def getConfig(filePath):
     config = configparser.ConfigParser()
@@ -274,9 +242,43 @@ def getConfig(filePath):
     return settings
 
 
-if __name__ == '__main__':
+def train(
+    paramsPath : str
+):
+    params = getConfig(paramsPath)
 
-    config = getConfig('config.ini')
-    train(params = config)
+    device = getDevice()
+
+    trainset, testset = getDataset(name = params['dataset_name'])
+
+    trainloader = buildDataloader(trainset,
+                                  batchsize  = int(params['batch_size']))
+
+    testloader = buildDataloader(testset,
+                                 batchsize = int(params['batch_size']))
+
+    model = buildModel(numCategories = int(params['categories']),
+                       device        = device)
+    
+    optimizer = buildOptimizer(model,
+                               typeOptimizer = params['optimizer'],
+                               learningRate  = params['learning_rate']) 
+    
+    lossf = buildLoss(typeLoss = params['loss'])
+    
+    for i in range(int(params['epochs'])):
+        print(f" > Epoch {i}/{params['epochs']}")
+
+        loss = trainEpoch(model, trainloader, optimizer, lossf, device) 
+        acc  = testEpoch(model, testloader, device)
+        
+        print('Training Loss:', loss, '|', 'Testing Accuracy:', acc)
+
+    saveModel(model, 
+              name = params['name'], 
+              path = params['path'])
+    
+    torch.cuda.empty_cache()
+    return
 
 
