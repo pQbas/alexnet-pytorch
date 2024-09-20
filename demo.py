@@ -1,8 +1,6 @@
-import cv2
-from alexnet.train import train, getConfig
-# from alexnet.inference import inference  
+from PIL import Image
 from alexnet.test import test 
-
+from alexnet.train import train
 # Training in a given dataset
 
 CONFIG_FILE_PATH = '/home/pqbas/projects/alexnet-pytorch/alexnet/config.ini'

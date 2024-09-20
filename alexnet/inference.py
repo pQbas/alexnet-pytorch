@@ -1,20 +1,19 @@
 from alexnet.model import AlexNet
-
-def loadModel(weightsPath):
-    '''
-    Loads the weights path to the model, and
-    return the model
-    '''
-
-    model = load...
-
-    return model
+from alexnet.utils import getConfig, INFERENCE_TRANSFORM
 
 
-def preprocess(inputData):
+def preprocess(
+    inputData
+    ):
     '''
     Apply preproceesing to the Data
+
+    inputData is something like an OpenCV image,
+    output of this is a tensor image normalized
     '''
+
+    if not(inputData): raise ValueError("inputData is not a valid type") 
+    preprocessData = INFERENCE_TRANSFORM(inputData)
 
     return preprocessData
 
