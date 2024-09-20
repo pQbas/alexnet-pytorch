@@ -9,7 +9,9 @@ from tqdm import tqdm
 from datetime import datetime
 
 from alexnet.model import AlexNet
-from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader
+# import alexnet.utils as utils
+from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader, loadModel
+# getConfig, getDataset, getDevice, buildDataloader
 
 
 def saveModel(

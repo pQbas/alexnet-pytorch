@@ -1,21 +1,21 @@
 import pytest
-from PIL import Image
-from alexnet import inference
-from alexnet import utils
 import torch
+from PIL import Image
+import alexnet
 
-def test_testing_preprocess():
-    IMG_PATH = '/test/gallery/cat.jpeg'
-    img = Image.open(IMG_PATH)
-    preprocessImage = inference.preprocess(img)
-    return
+def test_testing_inference():
+    CONFIG_FILE_PATH = '/home/pqbas/projects/alexnet-pytorch/alexnet/config.ini'
+    WEIGHTS_PATH = '/home/pqbas/projects/alexnet-pytorch/runs/alexnet.pt'
+    IMG_PATH = '/home/pqbas/projects/alexnet-pytorch/gallery/cat.jpeg'
 
-def test_testing_prediction():
-    WEIGHTS_PATH = '/test/runs/alexnet.pt'
-    PARAMS_PATH = '/test/alexnet/config.ini'
-    DEVICE = utils.getDevice()
+    # Device configuration using utils
+    DEVICE = alexnet.utils.getDevice()
 
-    model = utils.loadModel(WEIGHTS_PATH, PARAMS_PATH, device = DEVICE)
-    preprocessImage = torch.rand([4, 3, 224, 224]).to(DEVICE)
-    results = inference.predict(model, preprocessImage)
-    return
+    # Load model and perform inference
+    model = alexnet.utils.loadModel(WEIGHTS_PATH, CONFIG_FILE_PATH, device=DEVICE)
+    image = Image.open(IMG_PATH)
+
+    # Perform inference (preprocessing and prediction)
+    results = alexnet.inference(image, model, DEVICE)
+
+    print('Results:', results)

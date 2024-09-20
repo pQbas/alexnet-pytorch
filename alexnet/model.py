@@ -61,17 +61,17 @@ class AlexNet(nn.Module):
         x = self.stack8(x)
         return x
 
-
-if __name__ == '__main__':
-
-    model = AlexNet(categories=10)
-
-    input  = torch.rand([4, 3, 224, 224])
-    output = model(input)
-    print(output.shape)
-    probs  = nn.Softmax(dim=1)(output)
-    print(probs.shape)
-    # print(output)
-    # print(output.shape)
-
-
+#
+# if __name__ == '__main__':
+#
+#     model = AlexNet(categories=10)
+#
+#     input  = torch.rand([4, 3, 224, 224])
+#     output = model(input)
+#     print(output.shape)
+#     probs  = nn.Softmax(dim=1)(output)
+#     print(probs.shape)
+#     # print(output)
+#     # print(output.shape)
+#
+#

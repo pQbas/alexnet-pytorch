@@ -24,7 +24,7 @@ def predict(model, preprocessedData):
     '''
     output = model(preprocessedData)
     probs = nn.Softmax(dim=1)(output)
-    values, indices = torch.max(probs, dim=1)
+    _, indices = torch.max(probs, dim=1)
     prediction = indices if torch.is_tensor(indices) else None
     return prediction 
 
@@ -35,19 +35,12 @@ def postprocess(prediction):
     the probabilities and convert it into a json
     file with ineterpretable predictions
     '''
-
     return postProcessPrediction
 
 
-
-def inference(input, weightsPath):
-
-    model = loadModel(weightsPath)
-
+def inference(input, model, device): 
+    print('> Inference ....')
     preprocessData = preprocess(input)
-
-    prediction = predict(preprocessData)
-
-    postprocessData = postprocess(prediction)
-
-    return postprocessData
+    prediction = predict(model.to(device), preprocessData[None, ...].to(device))
+    # postprocessData = postprocess(prediction)
+    return prediction

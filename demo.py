@@ -1,47 +1,28 @@
+import torch
 from PIL import Image
-from alexnet.test import test 
-from alexnet.train import train
-# Training in a given dataset
+import alexnet
 
+# Constants for file paths
 CONFIG_FILE_PATH = '/home/pqbas/projects/alexnet-pytorch/alexnet/config.ini'
 WEIGHTS_PATH = '/home/pqbas/projects/alexnet-pytorch/runs/alexnet.pt'
+IMG_PATH = '/home/pqbas/projects/alexnet-pytorch/gallery/cat.jpeg'
 
+# Device configuration using utils
+DEVICE = alexnet.utils.getDevice()
 
-train(paramsPath = CONFIG_FILE_PATH)
+# Train the AlexNet model
+alexnet.train(paramsPath=CONFIG_FILE_PATH)
 
-accuracy = test(paramsPath = CONFIG_FILE_PATH, weightsPath = WEIGHTS_PATH)
+# Test the AlexNet model
+accuracy = alexnet.test(paramsPath=CONFIG_FILE_PATH, weightsPath=WEIGHTS_PATH)
+print('Test accuracy:', accuracy)
 
-print(accuracy) 
+# Load model and perform inference
+model = alexnet.utils.loadModel(WEIGHTS_PATH, CONFIG_FILE_PATH, device=DEVICE)
+image = Image.open(IMG_PATH)
 
-# Training in a given dataset
-#
-# CONFIG_FILE_PATH = '/home/pqbas/projects/alexnet-pytorch/alexnet/config.ini'
-#
-# config = getConfig(CONFIG_FILE_PATH)
-#
-# train(params = config)
-#
-# Inference over an image
+# Perform inference (preprocessing and prediction)
+results = alexnet.inference(image, model, DEVICE)
 
+print('Results:', results)
 
-#
-# IMG_FILE_PATH = ''
-# WEIGHTS_PATH = ''
-#
-#
-# img = cv2.imread(IMG_FILE_PATH)
-#
-# result = inference(input = img)
-
-# Validation over a dataset
-
-# DATASET_PATH = ''
-#
-# metrics = test(params = config)
-#
-
-# ??? How make transfer learning ... with this?
-# ??? How use alexnet as an object i mean
-#     -  alexnet.train ...?
-#     -  alexnet.inference ...?
-#

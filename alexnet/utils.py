@@ -6,7 +6,10 @@ import configparser
 import numpy as np
 
 
-def getConfig(filePath):
+def getConfig(
+    filePath : str
+    ):
+    print('file path:', filePath)
     config = configparser.ConfigParser()
     config.read(filePath)
 
@@ -95,7 +98,7 @@ def loadModel(
     '''
     params = getConfig(paramsPath)
     model = AlexNet(categories = int(params['categories']))
-    model.load_state_dict(torch.load(weightsPath, map_location=device))
+    model.load_state_dict(torch.load(weightsPath, map_location=device, weights_only=True))
     model.to(device)
     return model
 
