@@ -40,7 +40,7 @@ def getConfig(filePath):
 
 def getDataset(
     name : str,
-    path : str = None
+    path : str = './data'
 ):
     '''
     Returns a dataset
@@ -48,18 +48,15 @@ def getDataset(
     trainset, testset = None, None
     
     if name == 'cifar10':
-        transform = transforms.Compose(
-                [transforms.Resize((224,224)),
-                transforms.ToTensor(),
-                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-
-        trainset = torchvision.datasets.CIFAR10(root='./data', 
+        trainset = torchvision.datasets.CIFAR10(root=path, 
                                                 train=True,
                                                 download=True, 
-                                                transform=transform)
+                                                transform=TRAIN_TRANSFORM)
         
-        testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                            download=True, transform=transform)
+        testset = torchvision.datasets.CIFAR10(root=path, 
+                                               train=False,
+                                               download=True, 
+                                               transform=TRAIN_TRANSFORM)
     else:
         raise ValueError("At getDataset 'name' param must be one of valid datasets") 
     return (trainset, testset)
