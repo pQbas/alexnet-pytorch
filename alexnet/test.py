@@ -1,5 +1,6 @@
 from alexnet.model import AlexNet
-from alexnet.train import getConfig, getDataset, getDevice, buildDataloader
+from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader, loadModel
+
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -22,11 +23,11 @@ def test(
     testLoader = buildDataloader(testset,
                                  batchsize = int(params['batch_size']))
 
+
     # load model
-    model = AlexNet(categories = int(params['categories']))
-    model.load_state_dict(torch.load(weightsPath, map_location=device))
-    model.to(device)
-    model.eval()
+    model = loadModel(weightsPath = weightsPath, 
+                      paramsPath  = paramsPath, 
+                      device = device)
 
     # initial values of metrics
     total_correct, total_samples = 0, 0
