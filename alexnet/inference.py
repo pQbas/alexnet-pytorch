@@ -1,5 +1,7 @@
 from alexnet.model import AlexNet
 from alexnet.utils import getConfig, INFERENCE_TRANSFORM
+import torch.nn as nn
+import torch
 
 
 def preprocess(
@@ -11,12 +13,20 @@ def preprocess(
     inputData is something like an OpenCV image,
     output of this is a tensor image normalized
     '''
-
     if not(inputData): raise ValueError("inputData is not a valid type") 
     preprocessData = INFERENCE_TRANSFORM(inputData)
-
     return preprocessData
 
+
+def predict(model, preprocessedData):
+    '''
+    Perform prediction over the preprocessedData
+    '''
+    output = model(preprocessedData)
+    probs = nn.Softmax(dim=1)(output)
+    values, indices = torch.max(probs, dim=1)
+    prediction = indices if torch.is_tensor(indices) else None
+    return prediction 
 
 
 def postprocess(prediction):
@@ -28,13 +38,6 @@ def postprocess(prediction):
 
     return postProcessPrediction
 
-
-def predict(preprocessedData):
-    '''
-    Perform prediction over the preprocessedData
-    '''
-
-    return prediction
 
 
 def inference(input, weightsPath):
