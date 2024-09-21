@@ -4,6 +4,8 @@ import torchvision.transforms as transforms
 from alexnet.model import AlexNet
 import configparser
 import numpy as np
+from pathlib import Path
+import warnings
 
 
 def getConfig(
@@ -114,6 +116,25 @@ INFERENCE_TRANSFORM = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 ])
+
+
+def ensureDirectoryExists(dirPath):
+    dirPath = Path(dirPath)
+    
+    # Check if the directory already exists
+    if dirPath.is_dir():
+        print(f"Directory '{dirPath}' already exists.")
+        return
+
+    # Check if the parent directory exists
+    parentDir = dirPath.parent
+    if not parentDir.is_dir():
+        warnings.warn(f"Parent directory '{parentDir}' does not exist. Cannot create '{dirPath}'.")
+        return
+
+    # If the parent directory exists, create the new directory
+    dirPath.mkdir(exist_ok=True)
+    print(f"Directory '{dirPath}' has been created successfully.")
 
  
 

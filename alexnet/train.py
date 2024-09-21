@@ -10,7 +10,7 @@ from datetime import datetime
 
 from alexnet.model import AlexNet
 # import alexnet.utils as utils
-from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader, loadModel
+from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader, loadModel, ensureDirectoryExists 
 # getConfig, getDataset, getDevice, buildDataloader
 
 
@@ -24,15 +24,9 @@ def saveModel(
     a given name, return true if the model was 
     saved succesfully and false if not
     '''
+    ensureDirectoryExists(path)
 
     current_time = datetime.now().strftime('%Y%m%d-%H%M%S')
-    
-    if not os.path.exists(path):
-        os.makedirs(path)
-        print(f"Folder '{path}' created successfully.")
-    else:
-        print(f"Folder '{path}' already exists.")
-
     modelName = f'{name}-{current_time}.pt'  
     
     torch.save(model.state_dict(), os.path.join(path, modelName))
