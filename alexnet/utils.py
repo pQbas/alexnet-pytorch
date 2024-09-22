@@ -86,8 +86,8 @@ def buildDataloader(
     loader = torch.utils.data.DataLoader(dataset,
                                          batch_size=batchsize,
                                          shuffle=False,
-                                         num_workers=2,
-                                         sampler=np.random.permutation(10)) 
+                                         num_workers=2)
+                                        # sampler=np.random.permutation(200)
     return loader
 
 def loadModel(
