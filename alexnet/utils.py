@@ -7,11 +7,13 @@ import numpy as np
 from pathlib import Path
 import warnings
 
+import logging
+logger = logging.getLogger(__name__)  # Get logger for this module
+
 
 def getConfig(
     filePath : str
     ):
-    print('file path:', filePath)
     config = configparser.ConfigParser()
     config.read(filePath)
 
@@ -67,7 +69,7 @@ def getDataset(
     return (trainset, testset)
 
 
-def getDevice() -> str:
+def getDevice() -> str: 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     return device
 
@@ -81,12 +83,11 @@ def buildDataloader(
     -size and a typeLoader (train, test, val), for
     different use
     '''
-
     loader = torch.utils.data.DataLoader(dataset,
                                          batch_size=batchsize,
                                          shuffle=False,
                                          num_workers=2,
-                                         sampler=np.random.permutation(10))
+                                         sampler=np.random.permutation(10)) 
     return loader
 
 def loadModel(
@@ -123,7 +124,7 @@ def ensureDirectoryExists(dirPath):
     
     # Check if the directory already exists
     if dirPath.is_dir():
-        print(f"Directory '{dirPath}' already exists.")
+        logger.info(f"Directory '{dirPath}' already exists.")
         return
 
     # Check if the parent directory exists
@@ -134,7 +135,6 @@ def ensureDirectoryExists(dirPath):
 
     # If the parent directory exists, create the new directory
     dirPath.mkdir(exist_ok=True)
-    print(f"Directory '{dirPath}' has been created successfully.")
+    logger.info(f"Directory '{dirPath}' has been created successfully.")
 
  
-

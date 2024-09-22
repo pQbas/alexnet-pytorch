@@ -15,7 +15,6 @@ alexnet.train(paramsPath=CONFIG_FILE_PATH)
 
 # Test the AlexNet model
 accuracy = alexnet.test(paramsPath=CONFIG_FILE_PATH, weightsPath=WEIGHTS_PATH)
-print('Test accuracy:', accuracy)
 
 # Load model and perform inference
 model = alexnet.utils.loadModel(WEIGHTS_PATH, CONFIG_FILE_PATH, device=DEVICE)
@@ -24,5 +23,4 @@ image = Image.open(IMG_PATH)
 # Perform inference (preprocessing and prediction)
 results = alexnet.inference(image, model, DEVICE)
 
-print('Results:', results)
 
