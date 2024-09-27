@@ -11,13 +11,29 @@ WEIGHTS_PATH = '/home/pqbas/projects/alexnet-pytorch/alexnet/runs/alexnet.pt'
 import logging
 logger = logging.getLogger(__name__)  # Get logger for this module
 
-def test(paramsPath: str, weightsPath: str):
+from typing import Optional, Dict
+
+def test(
+    params      : Optional[Dict] = None, 
+    paramsPath  : Optional[str]  = None, 
+    weightsPath : Optional[str]  = None
+    ):
     logger.info('\n========== TESTING ==========\n')
 
-    # Load parameters and device
-    params = getConfig(paramsPath)
-    logger.info(f'Loaded config parameters from {paramsPath}')
+    # Check that only one of the parameters is provided
+    if paramsPath is not None and params is not None:
+        raise ValueError("You can only use one of 'paramsPath' or 'params', not both.")
     
+    if paramsPath is None and params is None:
+        raise ValueError("You must provide either 'paramsPath' or 'params'.")
+
+    # Load parameters if params is not directly provided
+    if params is None:
+        params = getConfig(paramsPath)
+        logger.info(f'Loaded training parameters from {paramsPath}')
+    else:
+        logger.info('Using provided parameters directly.')
+
     device = getDevice()
     logger.info(f'Using device: {device}')
 
@@ -34,8 +50,13 @@ def test(paramsPath: str, weightsPath: str):
     logger.info(f'Test dataloader created with batch size: {params["batch_size"]}')
 
     # Load the model with the provided weights
-    model = loadModel(weightsPath=weightsPath, paramsPath=paramsPath, device=device)
+    print(params)
+    if params is None:
+        model = loadModel(weightsPath=weightsPath, paramsPath=paramsPath, device=device)
+    else:
+        model = loadModel(weightsPath=weightsPath, params=params, device=device)
     logger.info(f'Model loaded successfully from {weightsPath}')
+
 
     # Initialize metrics
     total_correct, total_samples = 0, 0

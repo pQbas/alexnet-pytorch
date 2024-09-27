@@ -130,14 +130,28 @@ def trainEpoch(model, trainLoader, optimizer, lossf, device):
     logger.debug(f"Training epoch complete. Average loss: {avg_loss:.4f}")
     return avg_loss
 
+from typing import Optional, Dict
 
-def train(paramsPath: str):
+def train(
+    paramsPath : Optional[str]  = None,
+    params     : Optional[Dict] = None
+    ):
     logger.info('\n========== TRAINING ==========\n')
 
-    # Load parameters and device
-    params = getConfig(paramsPath)  # Assuming getConfig is defined elsewhere
-    logger.info(f'Loaded training parameters from {paramsPath}')
+    # Check that only one of the parameters is provided
+    if paramsPath is not None and params is not None:
+        raise ValueError("You can only use one of 'paramsPath' or 'params', not both.")
     
+    if paramsPath is None and params is None:
+        raise ValueError("You must provide either 'paramsPath' or 'params'.")
+
+    # Load parameters if params is not directly provided
+    if params is None:
+        params = getConfig(paramsPath)
+        logger.info(f'Loaded training parameters from {paramsPath}')
+    else:
+        logger.info('Using provided parameters directly.')
+   
     device = getDevice()  # Assuming getDevice is defined elsewhere
     logger.info(f'Using device: {device}')
 

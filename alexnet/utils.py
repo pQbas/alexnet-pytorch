@@ -86,20 +86,37 @@ def buildDataloader(
     loader = torch.utils.data.DataLoader(dataset,
                                          batch_size=batchsize,
                                          shuffle=False,
-                                         num_workers=2)
+                                         num_workers=2,
+                                         sampler=np.random.permutation(200))
                                         # sampler=np.random.permutation(200)
     return loader
 
+from typing import Optional, Dict
+
 def loadModel(
-    weightsPath : str, 
-    paramsPath  : str, 
-    device      : str
+    params      : Optional[Dict] = None,
+    weightsPath : Optional[str]  = None, 
+    paramsPath  : Optional[str]  = None, 
+    device      : Optional[str]  = None
     ):
     '''
     Loads the weights path to the model, and
     return the model
     '''
-    params = getConfig(paramsPath)
+    # Check that only one of the parameters is provided
+    if paramsPath is not None and params is not None:
+        raise ValueError("You can only use one of 'paramsPath' or 'params', not both.")
+    
+    if paramsPath is None and params is None:
+        raise ValueError("You must provide either 'paramsPath' or 'params'.")
+
+    # Load parameters if params is not directly provided
+    if params is None:
+        params = getConfig(paramsPath)
+        logger.info(f'Loaded training parameters from {paramsPath}')
+    else:
+        logger.info('Using provided parameters directly.')
+ 
     model = AlexNet(categories = int(params['categories']))
     model.load_state_dict(torch.load(weightsPath, map_location=device, weights_only=True))
     model.to(device)
