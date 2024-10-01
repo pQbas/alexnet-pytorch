@@ -12,7 +12,7 @@ def test_testing_inference():
     DEVICE = alexnet.utils.getDevice()
 
     # Load model and perform inference
-    model = alexnet.utils.loadModel(WEIGHTS_PATH, CONFIG_FILE_PATH, device=DEVICE)
+    model = alexnet.utils.loadModel(weightsPath=WEIGHTS_PATH, paramsPath=CONFIG_FILE_PATH, device=DEVICE)
     image = Image.open(IMG_PATH)
 
     # Perform inference (preprocessing and prediction)

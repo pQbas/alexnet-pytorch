@@ -28,10 +28,10 @@ def saveModel(model: nn.Module, name: str, path: str):
     try:
         torch.save(model.state_dict(), os.path.join(path, modelName))
         logger.debug(f"Model '{modelName}' saved successfully at '{path}'")
-        return True
+        return os.path.join(path,modelName)
     except Exception as e:
         logger.error(f"Error saving model '{modelName}' at '{path}': {e}")
-        return False
+        return None
 
 
 def buildLoss(typeLoss: str):
@@ -192,7 +192,8 @@ def train(
         logger.info(f'Epoch {epoch + 1}/{int(params["epochs"])} completed | Training Loss: {loss:.4f}, Test Accuracy: {acc:.4f}')
 
     # Save the model after training
-    if saveModel(model, name=params['model_name'], path=params['path']):
+    modelPath = saveModel(model, name=params['model_name'], path=params['path'])  
+    if modelPath:
         logger.info(f'Model saved successfully as {params["model_name"]} at {params["path"]}')
     else:
         logger.error(f'Failed to save model {params["model_name"]} at {params["path"]}')
@@ -201,4 +202,4 @@ def train(
     torch.cuda.empty_cache()
     logger.info('Training finished, GPU memory cache cleared')
 
-    return
+    return modelPath
