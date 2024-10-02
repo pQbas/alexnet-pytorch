@@ -16,7 +16,7 @@ This library gives access for three main actions with the alexnet-cnn, this acti
 `train`, `test` and `inference`. The `demo` folder contains an example of how use it. Here
 is a snippet with the code in the demo folder.
 
-```
+```python
 # Import alexnet library previously installed
 import alexnet
 from PIL import Image
