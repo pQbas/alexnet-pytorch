@@ -16,16 +16,17 @@ This library gives access for three main actions with the alexnet-cnn, this acti
 `train`, `test` and `inference`. The `demo` folder contains an example of how use it. Here
 is a snippet with the code in the demo folder.
 
+
+### Train action
+
+Following code helps you to train alexnet. To train is needed to define a `CONFIG_PARAMS`
+constant, this is a dictionary that contains training parameters such as `batch size`,
+`categories`, `optimizer`, `learning rate`, etc. The `train` function receives this
+dictionary and gives you the path where the weights were saved as a `pt` file.
+
 ```python
 # Import alexnet library previously installed
 import alexnet
-from PIL import Image
-
-# Constat with an image to perform the testing
-IMG_PATH = '../gallery/cat.jpeg'
-
-# Getting the main device to perform inference `gpu` by defult.
-DEVICE = alexnet.utils.getDevice()
 
 # Define the config params for all proceess
 CONFIG_PARAMS = {
@@ -42,9 +43,37 @@ CONFIG_PARAMS = {
 
 # Train the AlexNet model
 weightsPath = alexnet.train(params = CONFIG_PARAMS)
+```
+
+### Test action
+
+Result of this action is the accuracy metric computed for the trained model, this
+function receives the `paras` paramtere and also the `weights path`.
+
+```python
+# Import alexnet library previously installed
+import alexnet
 
 # Test the AlexNet model
 accuracy = alexnet.test(params = CONFIG_PARAMS, weightsPath=weightsPath)
+```
+
+### Inference action
+
+Inference receives an image, model and the device as input, and gives you the category
+of the image. In following example is used PIL to load the image, and some utilities
+as for loading the model and getting the device. 
+
+```python
+# Import alexnet library previously installed
+import alexnet
+from PIL import Image
+
+# Constat with an image to perform the testing
+IMG_PATH = '../gallery/cat.jpeg'
+
+# Getting the main device to perform inference `gpu` by defult.
+DEVICE = alexnet.utils.getDevice()
 
 # Load model the trained model and image 
 model = alexnet.utils.loadModel(weightsPath = weightsPath, params = CONFIG_PARAMS, device=DEVICE)
