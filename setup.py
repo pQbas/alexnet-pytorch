@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 
-description_ = """Library that gives an abstraction layer 
-to work with Alexnet CNN wit"""
+description_ = """Library that gives an abstraction layer to work with Alexnet CNN wit"""
 
 setup(
     name='alexnet',  # Name of your library
