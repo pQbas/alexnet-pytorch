@@ -1,0 +1,40 @@
+name: Publish to TestPyPI
+
+on:
+  push:
+    tags:
+      - 'v*'  # This triggers the workflow when a version tag is pushed
+  workflow_dispatch:  # Allows manual triggering of the workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'  # Specify your Python version
+
+      # Install build and twine packages
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      # Build the distribution files (source and wheel)
+      - name: Build the package
+        run: python -m build
+
+      # Upload the package to TestPyPI
+      - name: Publish to TestPyPI
+        env:
+          TWINE_USERNAME: __token__  # Use token authentication for TestPyPI
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}  # Secret stored in GitHub
+        run: |
+          python -m twine upload --repository testpypi dist/*
