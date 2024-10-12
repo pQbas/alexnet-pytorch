@@ -27,7 +27,7 @@ setup(
     python_requires='>=3.9',  # Specify the minimum Python version required
     
     # Dynamically load install_requires from requirements.txt
-    install_requires=parse_requirements('requirements.txt'),
+    install_requires=parse_requirements('./requirements.txt'),
 )
 
 
