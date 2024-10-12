@@ -55,7 +55,8 @@ function receives the `paras` paramtere and also the `weights path`.
 import alexnet
 
 # Test the AlexNet model
-accuracy = alexnet.test(params = CONFIG_PARAMS, weightsPath=weightsPath)
+accuracy = alexnet.test(params      = CONFIG_PARAMS, 
+                        weightsPath = weightsPath)
 ```
 
 ### Inference action
@@ -76,7 +77,9 @@ IMG_PATH = '../gallery/cat.jpeg'
 DEVICE = alexnet.utils.getDevice()
 
 # Load model the trained model and image 
-model = alexnet.utils.loadModel(weightsPath = weightsPath, params = CONFIG_PARAMS, device=DEVICE)
+model = alexnet.utils.loadModel(weightsPath = weightsPath, 
+                                params      = CONFIG_PARAMS, 
+                                device      = DEVICE)
 image = Image.open(IMG_PATH)
 
 # Perform inference (preprocessing and prediction)
