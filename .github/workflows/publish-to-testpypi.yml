@@ -21,15 +21,19 @@ jobs:
         with:
           python-version: '3.x'
 
+      # List files to ensure requirements.txt is present
+      - name: List files in the directory
+        run: ls -l
+
+      # Print contents of requirements.txt (for debugging)
+      - name: Print contents of requirements.txt
+        run: cat requirements.txt
+
       # Install build and twine packages
       - name: Install build tools
         run: |
           python -m pip install --upgrade pip
           pip install build twine
-
-      # Verify that requirements.txt exists (Optional)
-      - name: Verify requirements.txt
-        run: ls -l requirements.txt
 
       # Build the distribution files (source and wheel)
       - name: Build the package
@@ -42,3 +46,4 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
         run: |
           python -m twine upload --repository testpypi dist/*
+
