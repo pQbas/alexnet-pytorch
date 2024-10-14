@@ -39,11 +39,19 @@ jobs:
       - name: Build the package
         run: python setup.py sdist bdist_wheel
 
+      # Check dist files
+      - name: List dist files
+        run: ls -l dist
+
+      # Test if secret is available (for debugging)
+      - name: Test Secret
+        run: echo ${{ secrets.TEST_PYPI_API_TOKEN }}
+
       # Upload the package to TestPyPI
       - name: Publish to TestPyPI
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
         run: |
-          python -m twine upload --repository testpypi dist/*
+          python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
