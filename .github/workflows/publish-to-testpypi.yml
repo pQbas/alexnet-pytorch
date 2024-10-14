@@ -44,9 +44,9 @@ jobs:
       #   run: python setup.py sdist bdist_wheel
       #
       # Check dist files
-      - name: List dist files
-        run: ls -l dist
-
+      # - name: List dist files
+      #   run: ls -l dist
+      #
       # Build Docker image using the Dockerfile for deployment
       - name: Build Docker image for publishing
         run: docker build -t alexnet-pytorch-deploy -f Dockerfile.deploy .
