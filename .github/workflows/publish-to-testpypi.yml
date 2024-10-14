@@ -6,6 +6,10 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  id-token: write  # Added permission to request OIDC token
+  contents: read   # Allow access to repository contents
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -47,14 +51,7 @@ jobs:
       - name: Test Secret
         run: echo ${{ secrets.TEST_PYPI_API_TOKEN }}
 
-      # Upload the package to TestPyPI
-      # - name: Publish to TestPyPI
-      #   env:
-      #     TWINE_USERNAME: __token__
-      #     TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
-      #   run: |
-      #     twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-      #
+      # Upload the package to PyPI using pypa/gh-action-pypi-publish
       - name: Publish a Python distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
