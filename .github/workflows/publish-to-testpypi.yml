@@ -33,29 +33,35 @@ jobs:
       - name: Print contents of requirements.txt
         run: cat requirements.txt
 
-      # Install build and twine packages
-      - name: Install build tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install build twine setuptools
+      # # Install build and twine packages
+      # - name: Install build tools
+      #   run: |
+      #     python -m pip install --upgrade pip
+      #     pip install build twine setuptools
 
-      # Build the distribution files (source and wheel)
-      - name: Build the package
-        run: python setup.py sdist bdist_wheel
-
+      # # Build the distribution files (source and wheel)
+      # - name: Build the package
+      #   run: python setup.py sdist bdist_wheel
+      #
       # Check dist files
       - name: List dist files
         run: ls -l dist
 
-      # Test if secret is available (for debugging)
-      - name: Test Secret
-        run: echo ${{ secrets.TEST_PYPI_API_TOKEN }}
+      # Build Docker image using the Dockerfile for deployment
+      - name: Build Docker image for publishing
+        run: docker build -t alexnet-pytorch-deploy -f Dockerfile.deploy .
 
       # Upload the package to TestPyPI
-      - name: Publish to TestPyPI
+      # - name: Publish to TestPyPI
+      #   env:
+      #     TWINE_USERNAME: __token__
+      #     TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      #   run: |
+      #     python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+      
+      # Run Docker container and pass environment variables (secrets)
+      - name: Run Docker container for publishing
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        run: |
-          python -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}  # Pass your TestPyPI token here
+        run: docker run --env TWINE_USERNAME=__token__ --env TWINE_PASSWORD=${{ secrets.TEST_PYPI_API_TOKEN }} alexnet-pytorch-deploy
