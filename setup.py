@@ -12,7 +12,7 @@ description_ = """Library that gives an abstraction layer to work with Alexnet C
 
 setup(
     name='alexnet',  # Name of your library
-    version='0.1.3',  # Initial version number
+    version='0.1.4',  # Initial version number
     author='Percy Cubas',  # Your name
     author_email='pcubasm1@gmail.com',  # Your email address
     description=description_,  # Short description
