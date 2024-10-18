@@ -50,7 +50,7 @@ def test(
     logger.info(f'Test dataloader created with batch size: {params["batch_size"]}')
 
     # Load the model with the provided weights
-    print(params)
+    # print(params)
     if params is None:
         model = loadModel(weightsPath=weightsPath, paramsPath=paramsPath, device=device)
     else:
