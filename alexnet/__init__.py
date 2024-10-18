@@ -18,6 +18,14 @@ def is_notebook():
 
 # Set up the logging configuration
 def setup_logging():
+
+    # Get the root logger
+    logger = logging.getLogger()
+
+    # Remove all existing handlers
+    if logger.hasHandlers():
+        logger.handlers.clear()
+
     # Create a file handler for logging to a file
     file_handler = logging.FileHandler('app.log')
     file_handler.setLevel(logging.INFO)
