@@ -29,24 +29,25 @@ def setup_logging():
     # Create a file handler for logging to a file
     file_handler = logging.FileHandler('app.log')
     file_handler.setLevel(logging.INFO)
-    
+
     # Create a formatter for the file handler
     file_formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     file_handler.setFormatter(file_formatter)
-    
-    # Use RichHandler for the console output, but detect if we're in Jupyter
+
+    # Conditionally choose a console handler based on whether we are in a notebook
     if is_notebook():
-        # Use RichHandler and rich tracebacks for Jupyter
-        console_handler = RichHandler(rich_tracebacks=True)
+        # Use a simple StreamHandler for notebook environments
+        console_handler = logging.StreamHandler(sys.stdout)
     else:
-        # Use RichHandler for terminals
+        # Use RichHandler for terminals (assuming RichHandler is imported and available)
+        from rich.logging import RichHandler
         console_handler = RichHandler()
 
     # Set the logging format for console output (simplified for clarity)
-    console_handler.setFormatter(logging.Formatter("%(message)s"))
+    console_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
 
     # Configure the root logger
     logging.basicConfig(
