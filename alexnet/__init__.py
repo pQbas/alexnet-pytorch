@@ -22,29 +22,26 @@ def setup_logging():
     file_handler = logging.FileHandler('app.log')
     file_handler.setLevel(logging.INFO)
     
-    # Create a formatter for the file handler
     file_formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     file_handler.setFormatter(file_formatter)
-    
-    # Use RichHandler for the console output, but detect if we're in Jupyter
+
     if is_notebook():
-        # Use RichHandler and rich tracebacks for Jupyter
-        console_handler = RichHandler(rich_tracebacks=True)
+        # For Colab/Jupyter, use a simple StreamHandler to stdout
+        console_handler = logging.StreamHandler(sys.stdout)
     else:
-        # Use RichHandler for terminals
+        # For terminal, use RichHandler
         console_handler = RichHandler()
 
-    # Set the logging format for console output (simplified for clarity)
     console_handler.setFormatter(logging.Formatter("%(message)s"))
 
-    # Configure the root logger
     logging.basicConfig(
-        level=logging.INFO,  # Set logging level
-        handlers=[console_handler, file_handler]  # Log to both console and file
+        level=logging.INFO,
+        handlers=[console_handler, file_handler]
     )
+
 
 # Initialize logging when the package is imported
 setup_logging()
