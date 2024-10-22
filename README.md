@@ -13,8 +13,9 @@ pip install .
 ## How use it?
 
 This library gives access for three main actions with the alexnet-cnn, this actions are
-`train`, `test` and `inference`. The `demo` folder contains an example of how use it. Here
-is a snippet with the code in the demo folder.
+`train`, `test` and `inference`. The `demo` folder contains an example of how use it
+with a notebook ready to use in colab. Below are some snippets wich explains the code 
+in the demo folder.
 
 
 ### Train action
