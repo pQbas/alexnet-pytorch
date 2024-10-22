@@ -64,6 +64,30 @@ def getDataset(
                                                train=False,
                                                download=True, 
                                                transform=TRAIN_TRANSFORM)
+
+    elif name == 'mnist':
+        trainset = torchvision.datasets.MNIST(root=path, 
+                                              train=True,
+                                              download=True, 
+                                              transform=TRAIN_TRANSFORM)
+        
+        testset = torchvision.datasets.MNIST(root=path, 
+                                             train=False,
+                                             download=True, 
+                                             transform=TRAIN_TRANSFORM)
+
+    elif name == 'fashion_mnist':
+
+        trainset = torchvision.datasets.FashionMNIST(root=path, 
+                                                     train=True,
+                                                     download=True, 
+                                                     transform=TRAIN_TRANSFORM)
+        
+        testset = torchvision.datasets.FashionMNIST(root=path, 
+                                                    train=False,
+                                                    download=True, 
+                                                    transform=TRAIN_TRANSFORM)
+
     else:
         raise ValueError("At getDataset 'name' param must be one of valid datasets") 
     return (trainset, testset)
