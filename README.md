@@ -1,6 +1,6 @@
 <div align="center">
   <h1>alexnet-pytorch</h1>
-  Alexnet cnn implemented in pytorch
+  AlexNet CNN implemented in PyTorch, ready for training, testing, and inference.
   <!--  -->
   <!-- <p align="center"> -->
   <!--   <a href="here_is_a_demo_video"> -->
