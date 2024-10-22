@@ -1,9 +1,13 @@
+<div align="center">
+  <h1>alexnet-pytorch</h1>
+  Alexnet cnn implemented in pytorch
+  <!--  -->
+  <!-- <p align="center"> -->
+  <!--   <a href="here_is_a_demo_video"> -->
+  <!--   <img alt="Blueberry Detection ROS" src="gallery/image-demo.png"></a> -->
+  </p>
 
-<div style="text-align: center;">
-    <h1>alexnet-pytorch</h1>
 </div>
-
-Alexnet cnn implemented in pytorch
 
 
 ## How install?
