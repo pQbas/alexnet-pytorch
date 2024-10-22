@@ -1,4 +1,8 @@
-# alexnet-pytorch
+
+<div style="text-align: center;">
+    <h1>alexnet-pytorch</h1>
+</div>
+
 Alexnet cnn implemented in pytorch
 
 
