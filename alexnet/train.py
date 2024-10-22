@@ -12,6 +12,7 @@ from alexnet.model import AlexNet
 # import alexnet.utils as utils
 from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader, loadModel, ensureDirectoryExists 
 # getConfig, getDataset, getDevice, buildDataloader
+from typing import Optional, Dict
 
 import logging
 logger = logging.getLogger(__name__)  # Get logger for this module
@@ -130,7 +131,6 @@ def trainEpoch(model, trainLoader, optimizer, lossf, device):
     logger.debug(f"Training epoch complete. Average loss: {avg_loss:.4f}")
     return avg_loss
 
-from typing import Optional, Dict
 
 def train(
     paramsPath : Optional[str]  = None,
@@ -151,7 +151,7 @@ def train(
         logger.info(f'Loaded training parameters from {paramsPath}')
     else:
         logger.info('Using provided parameters directly.')
-   
+
     device = getDevice()  # Assuming getDevice is defined elsewhere
     logger.info(f'Using device: {device}')
 
