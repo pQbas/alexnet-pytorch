@@ -4,3 +4,4 @@ numpy
 tqdm
 colorlog
 rich
+mlflow
