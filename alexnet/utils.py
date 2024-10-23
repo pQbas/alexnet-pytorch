@@ -6,6 +6,7 @@ import configparser
 import numpy as np
 from pathlib import Path
 import warnings
+import torch.nn as nn
 
 import logging
 logger = logging.getLogger(__name__)  # Get logger for this module
@@ -90,11 +91,17 @@ def getDataset(
 
     else:
         raise ValueError("At getDataset 'name' param must be one of valid datasets") 
+
+    logger.info(f'Dataset loaded: {name},' 
+                f'Training samples: {len(trainset)},' 
+                f'Test samples: {len(testset)}')
+
     return (trainset, testset)
 
 
 def getDevice() -> str: 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    logger.info(f'Using device: {device}')
     return device
 
 
@@ -112,7 +119,30 @@ def buildDataloader(
                                          shuffle=False,
                                          num_workers=2)
                                         # sampler=np.random.permutation(200)
+
+    logger.info(f'dataloaders created with batch size: {batchsize}')
+
     return loader
+
+
+def buildModel(
+        numCategories: int, 
+        device: str
+    ):
+    '''
+    Builds the model, moves it to the specified device, and performs a dummy forward pass.
+    '''
+    logger.debug(f"Building model for {numCategories} categories on device {device}")
+    
+    model = AlexNet(categories=numCategories).to(device)  # Assuming AlexNet is defined elsewhere
+    dummyInput = torch.rand([1, 3, 224, 224]).to(device)
+    model(dummyInput)  # Forward pass to initialize the model
+
+    logger.info(f'Model created and initialized on device {device}')
+    logger.debug("Model initialized successfully")
+    return model
+
+
 
 from typing import Optional, Dict
 
@@ -159,7 +189,9 @@ INFERENCE_TRANSFORM = transforms.Compose([
 ])
 
 
-def ensureDirectoryExists(dirPath):
+def ensureDirectoryExists(
+    dirPath
+    ):
     dirPath = Path(dirPath)
     
     # Check if the directory already exists
@@ -177,4 +209,48 @@ def ensureDirectoryExists(dirPath):
     dirPath.mkdir(exist_ok=True)
     logger.info(f"Directory '{dirPath}' has been created successfully.")
 
- 
+
+def buildLoss(
+    typeLoss: str
+    ):
+    '''
+    Returns the loss function based on the typeLoss parameter.
+    '''
+    logger.debug(f"Initializing loss function: {typeLoss}")
+
+    lossf = None
+
+    if typeLoss == 'binary-cross-entropy':
+        lossf = nn.BCELoss()
+    elif typeLoss == 'cross-entropy':
+        lossf = nn.CrossEntropyLoss()
+    else:
+        logger.error(f"Invalid loss function type: {typeLoss}")
+        raise ValueError("Invalid loss function type")
+
+    logger.info(f'Loss initialized: {typeLoss}')
+
+    return lossf
+
+
+def buildOptimizer(model: nn.Module, typeOptimizer: str, learningRate: float):
+    '''
+    Returns the optimizer based on the typeOptimizer parameter.
+    '''
+    logger.debug(f"Initializing optimizer: {typeOptimizer} with learning rate: {learningRate}")
+
+    optimizer = None
+
+    if typeOptimizer == 'sgd':
+        optimizer = optim.SGD(model.parameters(), lr=learningRate)
+    elif typeOptimizer == 'adam':
+        optimizer = optim.Adam(model.parameters(), lr=learningRate)
+    elif typeOptimizer == 'adadelta':
+        optimizer = optim.Adadelta(model.parameters(), lr=learningRate)
+    else:
+        logger.error(f"Invalid optimizer type: {typeOptimizer}")
+        raise ValueError("Invalid optimizer type")
+
+    logger.info(f'Optimizer initialized: {typeOptimizer}')
+    return optimizer
+

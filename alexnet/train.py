@@ -10,7 +10,8 @@ from datetime import datetime
 
 from alexnet.model import AlexNet
 # import alexnet.utils as utils
-from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader, loadModel, ensureDirectoryExists 
+from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader, loadModel, ensureDirectoryExists, buildModel, buildLoss, buildOptimizer 
+
 # getConfig, getDataset, getDevice, buildDataloader
 from typing import Optional, Dict
 
@@ -33,52 +34,6 @@ def saveModel(model: nn.Module, name: str, path: str):
     except Exception as e:
         logger.error(f"Error saving model '{modelName}' at '{path}': {e}")
         return None
-
-
-def buildLoss(typeLoss: str):
-    '''
-    Returns the loss function based on the typeLoss parameter.
-    '''
-    logger.debug(f"Initializing loss function: {typeLoss}")
-    
-    if typeLoss == 'binary-cross-entropy':
-        return nn.BCELoss()
-    elif typeLoss == 'cross-entropy':
-        return nn.CrossEntropyLoss()
-    else:
-        logger.error(f"Invalid loss function type: {typeLoss}")
-        raise ValueError("Invalid loss function type")
-
-
-def buildOptimizer(model: nn.Module, typeOptimizer: str, learningRate: float):
-    '''
-    Returns the optimizer based on the typeOptimizer parameter.
-    '''
-    logger.debug(f"Initializing optimizer: {typeOptimizer} with learning rate: {learningRate}")
-
-    if typeOptimizer == 'sgd':
-        return optim.SGD(model.parameters(), lr=learningRate)
-    elif typeOptimizer == 'adam':
-        return optim.Adam(model.parameters(), lr=learningRate)
-    elif typeOptimizer == 'adadelta':
-        return optim.Adadelta(model.parameters(), lr=learningRate)
-    else:
-        logger.error(f"Invalid optimizer type: {typeOptimizer}")
-        raise ValueError("Invalid optimizer type")
-
-
-def buildModel(numCategories: int, device: str):
-    '''
-    Builds the model, moves it to the specified device, and performs a dummy forward pass.
-    '''
-    logger.debug(f"Building model for {numCategories} categories on device {device}")
-    
-    model = AlexNet(categories=numCategories).to(device)  # Assuming AlexNet is defined elsewhere
-    dummyInput = torch.rand([1, 3, 224, 224]).to(device)
-    model(dummyInput)  # Forward pass to initialize the model
-    
-    logger.debug("Model initialized successfully")
-    return model
 
 
 def testEpoch(model, testLoader, device):
@@ -136,7 +91,7 @@ def train(
     paramsPath : Optional[str]  = None,
     params     : Optional[Dict] = None
     ):
-    logger.info('\n========== TRAINING ==========\n')
+    logger.info('========== TRAINING ==========\n')
 
     # Check that only one of the parameters is provided
     if paramsPath is not None and params is not None:
@@ -153,43 +108,42 @@ def train(
         logger.info('Using provided parameters directly.')
 
     device = getDevice()  # Assuming getDevice is defined elsewhere
-    logger.info(f'Using device: {device}')
-
+      
     # Log training configuration details
-    logger.info(f'Training configuration | Model: {params["model_name"]} | Dataset: {params["dataset_name"]} | '
-                f'Epochs: {params["epochs"]} | Batch size: {params["batch_size"]} | '
-                f'Optimizer: {params["optimizer"]} | Learning rate: {params["learning_rate"]} | Loss function: {params["loss"]}')
-
+    logger.info(f'Training configuration | Model: {params["model_name"]} |' 
+                f'Dataset: {params["dataset_name"]} | Epochs: {params["epochs"]} |'
+                f'Batch size: {params["batch_size"]} | Optimizer: {params["optimizer"]} |' 
+                f'Learning rate: {params["learning_rate"]} | Loss function: {params["loss"]}')
+     
     # Load datasets
-    trainset, testset = getDataset(name=params['dataset_name'])  # Assuming getDataset is defined elsewhere
-    logger.info(f'Dataset loaded: {params["dataset_name"]}, Training samples: {len(trainset)}, Test samples: {len(testset)}')
-
-    # Build dataloaders
-    trainloader = buildDataloader(trainset, batchsize=int(params['batch_size']))  # Assuming buildDataloader is defined elsewhere
-    testloader = buildDataloader(testset, batchsize=int(params['batch_size']))
-    logger.info(f'Dataloaders created with batch size: {params["batch_size"]}')
-
+    trainset, testset = getDataset(name=params['dataset_name'])
+     
+    trainloader = buildDataloader(trainset, 
+                                  batchsize=int(params['batch_size']))
+      
+    testloader = buildDataloader(testset, 
+                                 batchsize=int(params['batch_size']))
+    
     # Build model
-    model = buildModel(numCategories=int(params['categories']), device=device)
-    logger.info(f'Model {params["model_name"]} created and initialized on device {device}')
+    model = buildModel(numCategories=int(params['categories']), 
+                       device=device)
 
     # Build optimizer and loss function
-    optimizer = buildOptimizer(model, typeOptimizer=params['optimizer'], learningRate=params['learning_rate'])
+    optimizer = buildOptimizer(model, 
+                               typeOptimizer=params['optimizer'], 
+                               learningRate=params['learning_rate'])
+
     lossf = buildLoss(typeLoss=params['loss'])
-    logger.info(f'Optimizer and loss function initialized: Optimizer: {params["optimizer"]}, '
-                f'Learning rate: {params["learning_rate"]}, Loss function: {params["loss"]}')
 
     # Training loop
     for epoch in range(int(params['epochs'])):
-        # logger.info(f'Epoch {epoch + 1}/{int(params["epochs"])} started')
 
-        # Train the model for one epoch
         loss = trainEpoch(model, trainloader, optimizer, lossf, device)
         
-        # Evaluate the model on the test set
         acc = testEpoch(model, testloader, device)
 
-        logger.info(f'Epoch {epoch + 1}/{int(params["epochs"])} completed | Training Loss: {loss:.4f}, Test Accuracy: {acc:.4f}')
+        logger.info(f'Epoch {epoch + 1}/{int(params["epochs"])} completed |' 
+                    f'Training Loss: {loss:.4f}, Test Accuracy: {acc:.4f}')
 
     # Save the model after training
     modelPath = saveModel(model, name=params['model_name'], path=params['path'])  
