@@ -1,4 +1,5 @@
 import torch
+import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 from alexnet.model import AlexNet
@@ -7,7 +8,8 @@ import numpy as np
 from pathlib import Path
 import warnings
 import torch.nn as nn
-
+import mlflow
+import mlflow.pytorch
 import logging
 logger = logging.getLogger(__name__)  # Get logger for this module
 
@@ -117,8 +119,8 @@ def buildDataloader(
     loader = torch.utils.data.DataLoader(dataset,
                                          batch_size=batchsize,
                                          shuffle=False,
-                                         num_workers=2)
-                                        # sampler=np.random.permutation(200)
+                                         num_workers=2,
+                                         sampler=np.random.permutation(200))
 
     logger.info(f'dataloaders created with batch size: {batchsize}')
 
@@ -253,4 +255,19 @@ def buildOptimizer(model: nn.Module, typeOptimizer: str, learningRate: float):
 
     logger.info(f'Optimizer initialized: {typeOptimizer}')
     return optimizer
+
+
+def track_metric(
+    tracking_active, 
+    param_name=None, 
+    param_value=None, 
+    metric_name=None, 
+    metric_value=None, 
+    step=None
+    ):
+    if tracking_active:
+        if param_name and param_value is not None:
+            mlflow.log_param(param_name, param_value)
+        if metric_name and metric_value is not None:
+            mlflow.log_metric(metric_name, metric_value, step=step)
 

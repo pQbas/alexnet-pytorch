@@ -24,7 +24,8 @@ CONFIG_PARAMS = {
 }
 
 # Train the AlexNet model
-weightsPath = alexnet.train(params = CONFIG_PARAMS)
+weightsPath = alexnet.train(params = CONFIG_PARAMS,
+                            tracking_train = True)
 
 # Test the AlexNet model
 accuracy = alexnet.test(params = CONFIG_PARAMS, weightsPath=weightsPath)

@@ -10,11 +10,11 @@ from datetime import datetime
 
 from alexnet.model import AlexNet
 # import alexnet.utils as utils
-from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader, loadModel, ensureDirectoryExists, buildModel, buildLoss, buildOptimizer 
-
+from alexnet.utils import getConfig, getDataset, getDevice, buildDataloader, loadModel, ensureDirectoryExists, buildModel, buildLoss, buildOptimizer, track_metric 
 # getConfig, getDataset, getDevice, buildDataloader
 from typing import Optional, Dict
-
+import mlflow
+import mlflow.pytorch
 import logging
 logger = logging.getLogger(__name__)  # Get logger for this module
 
@@ -89,7 +89,8 @@ def trainEpoch(model, trainLoader, optimizer, lossf, device):
 
 def train(
     paramsPath : Optional[str]  = None,
-    params     : Optional[Dict] = None
+    params     : Optional[Dict] = None,
+    tracking_train : bool = False
     ):
     logger.info('========== TRAINING ==========\n')
 
@@ -135,6 +136,14 @@ def train(
 
     lossf = buildLoss(typeLoss=params['loss'])
 
+    if tracking_train:
+        mlflow.set_experiment("experimento_condicional")
+        mlflow.start_run()
+    
+    # Registrar hiperparámetros solo si el tracking está activo
+    track_metric(tracking_train, param_name="learning_rate", param_value = params['learning_rate'])
+    track_metric(tracking_train, param_name="epochs", param_value = params['epochs'] )
+    
     # Training loop
     for epoch in range(int(params['epochs'])):
 
@@ -142,11 +151,18 @@ def train(
         
         acc = testEpoch(model, testloader, device)
 
+        track_metric(tracking_train, metric_name="loss", metric_value=loss, 
+                     step=epoch)
+
+        track_metric(tracking_train, metric_name="accuracy", metric_value=acc,
+                     step=epoch)
+
         logger.info(f'Epoch {epoch + 1}/{int(params["epochs"])} completed |' 
                     f'Training Loss: {loss:.4f}, Test Accuracy: {acc:.4f}')
 
-    # Save the model after training
+
     modelPath = saveModel(model, name=params['model_name'], path=params['path'])  
+    
     if modelPath:
         logger.info(f'Model saved successfully as {params["model_name"]} at {params["path"]}')
     else:
