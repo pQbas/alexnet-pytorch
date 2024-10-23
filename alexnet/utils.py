@@ -119,8 +119,8 @@ def buildDataloader(
     loader = torch.utils.data.DataLoader(dataset,
                                          batch_size=batchsize,
                                          shuffle=False,
-                                         num_workers=2,
-                                         sampler=np.random.permutation(200))
+                                         num_workers=2)
+                                         # sampler=np.random.permutation(200))
 
     logger.info(f'dataloaders created with batch size: {batchsize}')
 
